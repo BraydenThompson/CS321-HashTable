@@ -7,7 +7,11 @@ public class HashObject<T>
 {
     private T keyObject;            // The generic data to be stored in the HashObject, acts as a key object for hashing
     private int duplicateCount;     // The number of additional duplicates of the object
+
+
+
     private int probeCount;         // The number of probes required to store object in open addressed HashTable
+    private boolean deleted;        // Whether this HashObject has been deleted or not
 
     /**
      * Default constructor of the HashObject class
@@ -72,5 +76,30 @@ public class HashObject<T>
     public T getKeyObject()
     {
         return keyObject;
+    }
+
+    /**
+     * Gets if the object has the deleted flag
+     * @return true if deleted
+     */
+    public boolean isDeleted()
+    {
+        return deleted;
+    }
+
+    /**
+     * Gets the duplicate count
+     * @return duplicate count
+     */
+    public int getDuplicateCount() {
+        return duplicateCount;
+    }
+
+    /**
+     * Gets the probe count
+     * @return probe count
+     */
+    public int getProbeCount() {
+        return probeCount;
     }
 }
