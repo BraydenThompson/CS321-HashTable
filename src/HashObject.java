@@ -45,10 +45,9 @@ public class HashObject<T>
      * @param object - The object to compare to
      * @return True if equivalent, false otherwise
      */
-    @Override
-    public boolean equals(Object object)
+    public boolean equals(HashObject object)
     {
-        return keyObject.equals(object);
+        return keyObject.equals(object.getKeyObject());
     }
 
     /**
@@ -57,7 +56,7 @@ public class HashObject<T>
     @Override
     public String toString()
     {
-        return (keyObject.toString()) + " " + duplicateCount + " " + probeCount;
+        return ("Key: " + keyObject.toString() + " Dup: " + duplicateCount + " Pro: " + probeCount);
     }
 
     /**

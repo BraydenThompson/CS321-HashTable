@@ -8,8 +8,19 @@ import java.util.Random;
 public class HashTest {
     public static void main(String[] args)
     {
-        long num = findTwinPrimes(214074848, 914804848, 10);
-        System.out.println(num);
+        final long MIN_TABLE_SIZE = 500;
+        final long MAX_TABLE_SIZE = 1000;
+        final int PRIME_TESTS = 2;
+
+        long size = findTwinPrimes(MIN_TABLE_SIZE, MAX_TABLE_SIZE, PRIME_TESTS);
+        HashTable<Integer> table = new HashTable((int) size, false);
+
+        Random rand = new Random();
+        for (int i = 0; i < size; i++)
+        {
+            table.insert(rand.nextInt());
+        }
+        System.out.println("Done");
     }
 
     /**
@@ -44,7 +55,7 @@ public class HashTest {
      * @param tests the number of times to test if a number is prime, each test has a false positive chance of (1 / 10^13)
      * @return true if tests return true, false otherwise
      */
-    static boolean isPrime (long p, int tests)
+    private static boolean isPrime(long p, int tests)
     {
         int numTests = 0;       // The number of tests run so far
         long value;          // The result of each test (= 1 if prime)

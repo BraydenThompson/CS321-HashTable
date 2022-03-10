@@ -2,6 +2,7 @@ public class HashTable<T>
 {
     private HashObject[] table;     // The table in which to store HashObjects
     private boolean doubleHash;     // True if using double hashing, false if using linear hashing.
+    private int size;
     private int globalProbeCount;   // The global probe count (not counting duplicates)
 
     /**
@@ -11,6 +12,7 @@ public class HashTable<T>
      */
     public HashTable (int size, boolean doubleHash)
     {
+        this.size = size;
         table = new HashObject[size];
         this.doubleHash = doubleHash;
         globalProbeCount = 0;
@@ -24,51 +26,47 @@ public class HashTable<T>
      */
     public int insert (T object)
     {
-        HashObject hashObject = new HashObject(object);     // Create new hashObject
-        int j;                                              // The current probing sequence index
+        HashObject hashObject = new HashObject<T>(object);  // Create new hashObject
+        int i = 0;                                          // Index to search through table
+        boolean found = false;                              // Whether a valid position has been found
         int retVal = -1;                                    // The value to return
+        int j = 0;                                          // The current probing sequence index
 
-        if (doubleHash) // Check if using double hashing or linear hashing
+        while (i < table.length && !found)
         {
-            for (int i = 0; i < table.length; i++)
-            {
+            if (doubleHash)
                 j = doubleHashProbe(hashObject.getKey(), i);
-
-                hashObject.incrementProbeCount();                   // Increment probe count
-
-                if ((table[j] == null) || (table[j].isDeleted()))   // Check if entry is empty
-                {
-                    globalProbeCount += hashObject.getProbeCount(); // Add probes to global probe count
-                    table[j] = hashObject;
-                    retVal = j;
-                }
-                else if (hashObject.equals(table[j]))               // Check if duplicate
-                {
-                    table[j].incrementDuplicateCount();
-                }
-            }
-        }
-        else
-        {
-            for (int i = 0; i < table.length; i++)
-            {
+            else
                 j = linearProbe(hashObject.getKey(), i);
 
-                hashObject.incrementProbeCount();                   // Increment probe count
+            hashObject.incrementProbeCount();                   // Increment probe count
 
-                if ((table[j] == null) || (table[j].isDeleted()))   // Check if entry is empty
-                {
-                    globalProbeCount += hashObject.getProbeCount(); // Add probes to global probe count
-                    table[j] = hashObject;
-                    retVal = j;
-                }
-                else if (hashObject.equals(table[j]))               // Check if duplicate
-                {
-                    table[j].incrementDuplicateCount();
-                }
+            if ((table[j] == null) || (table[j].isDeleted()))   // Check if entry is empty
+            {
+                globalProbeCount += hashObject.getProbeCount(); // Add probes to global probe count
+                table[j] = hashObject;
+                retVal = j;
+                found = true;
             }
+            else if (hashObject.equals(table[j]))               // Check if duplicate
+            {
+                table[j].incrementDuplicateCount();
+                retVal = j;
+                found = true;
+            }
+            i++;
         }
+        System.out.println(table[j].toString());
         return retVal;
+    }
+
+    public HashObject getObject(int i)
+    {
+        if (i < 0 || i > table.length)
+        {
+            throw new IndexOutOfBoundsException("Index out of bounds of table");
+        }
+        return table[i];
     }
 
     /**
@@ -93,7 +91,7 @@ public class HashTable<T>
     {
         int h1 = positiveMod(key, table.length);
         int h2 = 1 + positiveMod(key, table.length - 2);
-        return (h1 + (i * h2));
+        return (h1 + (i * h2)) % table.length;
     }
 
     /**
@@ -112,4 +110,12 @@ public class HashTable<T>
         return value;
     }
 
+    /**
+     * Gets the total number of probes for every item in table
+     * @return global probe count
+     */
+    public int getGlobalProbeCount()
+    {
+        return globalProbeCount;
+    }
 }
