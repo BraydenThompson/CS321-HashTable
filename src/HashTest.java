@@ -12,16 +12,60 @@ public class HashTest {
         final long MAX_TABLE_SIZE = 1000;
         final int PRIME_TESTS = 2;
 
-        long size = findTwinPrimes(MIN_TABLE_SIZE, MAX_TABLE_SIZE, PRIME_TESTS);
-        HashTable<Integer> table = new HashTable((int) size, false);
+        int inputType;                 // Input type: 1 - Random Integers, 2 - Current Time Ms, 3 - word - list
+        float loadFactor;                 // Load factor: Target alpha value, between 0 and 1
+        int debugMode;
 
-        Random rand = new Random();
-        for (int i = 0; i < size; i++)
+        /* Read in user arguments */
+        if (args.length == 2 || args.length == 3)
         {
-            table.insert(rand.nextInt());
+            /* Input type */
+            if (args[0].equals("1") || args[0].equals("2") || args[0].equals("3"))
+            {
+                inputType = Integer.parseInt(args[0]);
+            }
+            else
+            {
+                printUsage();
+                System.exit(1);
+            }
+
+            /* Load Factor */
+            if (Float.parseFloat(args[1]) > 0 && Float.parseFloat(args[1]) <= 1)
+            {
+                loadFactor = Float.parseFloat(args[1]);
+            }
+            else
+            {
+                printUsage();
+                System.exit(1);
+            }
         }
-        System.out.println("Done");
+
+        if (args.length == 3)
+        {
+            /* Load Factor */
+            if (args[2].equals("0") || args[2].equals("1"))
+            {
+                debugMode = Integer.parseInt(args[0]);
+            }
+            else
+            {
+                printUsage();
+                System.exit(1);
+            }
+        }
     }
+
+    private static void printUsage()
+    {
+        System.out.println("HashTest is used as follows:");
+        System.out.println("java HashTest <input type> <load factor> [<debug level>]");
+        System.out.println("Input type: 1 - Random Integers, 2 - Current Time Ms, 3 - word - list");
+        System.out.println("Load factor: Target alpha value, between 0 and 1");
+        System.out.println("(Optional) Debug level: (Default) 0 - Print summary, 1 - Print summary and dump tables");
+    }
+
 
     /**
      * findTwinPrimes - Finds the smallest twin prime numbers (a prime two away from another prime)
