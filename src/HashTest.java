@@ -189,8 +189,8 @@ public class HashTest {
             }
 
             try {
-                Files.write(Paths.get("linear-dump.txt"), linearDump.toString().getBytes());
-                Files.write(Paths.get("double-dump.txt"), doubleDump.toString().getBytes());
+                Files.write(Paths.get("linear-dump"), linearDump.toString().getBytes());
+                Files.write(Paths.get("double-dump"), doubleDump.toString().getBytes());
             } catch (IOException e) {
                 e.printStackTrace();
             }
