@@ -3,18 +3,25 @@
  * Supports three input types, TODO
  */
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Random;
+import java.util.Scanner;
 
 public class HashTest {
     public static void main(String[] args)
     {
-        final long MIN_TABLE_SIZE = 500;
-        final long MAX_TABLE_SIZE = 1000;
+        final long MIN_TABLE_SIZE = 95600;
+        final long MAX_TABLE_SIZE = 96000;
         final int PRIME_TESTS = 2;
 
-        int inputType;                 // Input type: 1 - Random Integers, 2 - Current Time Ms, 3 - word - list
-        float loadFactor;                 // Load factor: Target alpha value, between 0 and 1
-        int debugMode;
+        int inputType = -1;                 // Input type: 1 - Random Integers, 2 - Current Time Ms, 3 - word - list
+        double loadFactor = -1.0;           // Load factor: Target alpha value, between 0 and 1
+        int debugMode = -1;
+        long tableSize;
 
         /* Read in user arguments */
         if (args.length == 2 || args.length == 3)
@@ -31,9 +38,9 @@ public class HashTest {
             }
 
             /* Load Factor */
-            if (Float.parseFloat(args[1]) > 0 && Float.parseFloat(args[1]) <= 1)
+            if (Double.parseDouble(args[1]) > 0 && Double.parseDouble(args[1]) <= 1)
             {
-                loadFactor = Float.parseFloat(args[1]);
+                loadFactor = Double.parseDouble(args[1]);
             }
             else
             {
@@ -47,12 +54,145 @@ public class HashTest {
             /* Load Factor */
             if (args[2].equals("0") || args[2].equals("1"))
             {
-                debugMode = Integer.parseInt(args[0]);
+                debugMode = Integer.parseInt(args[2]);
             }
             else
             {
                 printUsage();
                 System.exit(1);
+            }
+        }
+
+        /* Calculate table size */
+        tableSize = findTwinPrimes(MIN_TABLE_SIZE, MAX_TABLE_SIZE, PRIME_TESTS);
+        if (tableSize < 1)
+        {
+            System.out.println("No twin prime values found for table size");
+            System.exit(2);
+        }
+        System.out.println("A good table size is found: " + tableSize);
+
+        HashTable linearProbingTable = null;
+        HashTable doubleHashingTable = null;
+
+
+        /* Input data into tables */
+        switch (inputType)
+        {
+            /* Random Integers */
+            case 1:
+            {
+                System.out.println("Data source type: random number");
+                // Create Hash Tables
+                linearProbingTable = new HashTable<Integer>((int) tableSize, false);
+                doubleHashingTable = new HashTable<Integer>((int) tableSize, true);
+
+                Random rand = new Random();
+                int inputNum;
+                // Fill tables until target load factor is reached
+                while ((linearProbingTable.getNumElements() / (double) tableSize) < loadFactor)
+                {
+                    inputNum = rand.nextInt();
+                    linearProbingTable.insert(inputNum);
+                    doubleHashingTable.insert(inputNum);
+                }
+                break;
+            }
+            case 2:
+            {
+                System.out.println("Data source type: current time");
+                linearProbingTable = new HashTable<Long>((int) tableSize, false);
+                doubleHashingTable = new HashTable<Long>((int) tableSize, true);
+
+                // TODO: TEMP DEBUG PRINT
+                System.out.println(linearProbingTable.getNumDuplicates());
+
+                long inputNum;
+                int i = 0; // TODO: TEMP CHECKER
+                // Fill tables until target load factor is reached
+                while ((linearProbingTable.getNumElements() / (double) tableSize) < loadFactor)
+                {
+                    inputNum = System.currentTimeMillis();
+                    linearProbingTable.insert(inputNum);
+                    doubleHashingTable.insert(inputNum);
+
+                    // TODO: TEMP DEBUG PRINT
+                    if (i % 10000 == 0)
+                    {
+                      //  System.out.println(linearProbingTable.getNumElements());          // TODO: THIS WORKS TOTALLY FINE IN DEBUGGER, RETURNS GIANT NUMBERS WHEN ACTUALLY RUNNING IT
+                    }
+                    i++;
+                }
+                break;
+            }
+            case 3:
+            {
+                System.out.println("Data source type: word-list");
+                // Create Hash Tables
+                linearProbingTable = new HashTable<String>((int) tableSize, false);
+                doubleHashingTable = new HashTable<String>((int) tableSize, true);
+
+                File wordList = new File("src/word-list");
+                try {
+                    Scanner listScan = new Scanner(wordList);
+
+                    String inputWord;
+                    // Fill tables until target load factor is reached
+                    while ((linearProbingTable.getNumElements() / (double) tableSize) < loadFactor)
+                    {
+                        inputWord = listScan.nextLine();
+                        linearProbingTable.insert(inputWord);
+                        doubleHashingTable.insert(inputWord);
+                    }
+                }
+                catch (FileNotFoundException e)
+                {
+                    e.printStackTrace();
+                }
+                break;
+            }
+        }
+
+        /* Output Results */
+        double avgLinearProbes = (linearProbingTable.getGlobalProbeCount() / (double) linearProbingTable.getNumElements());
+        double avgDoubleProbes = (doubleHashingTable.getGlobalProbeCount() / (double) doubleHashingTable.getNumElements());
+
+        System.out.println("\nUsing Linear Hashing....");
+        System.out.println("Input " + linearProbingTable.getNumElements() + ", of which " + linearProbingTable.getNumDuplicates() + " duplicates");
+        System.out.println("load factor = " + loadFactor + ", Avg. no. of probes " + avgLinearProbes);
+        System.out.println();
+        System.out.println("Using Double Hashing....");
+        System.out.println("Input " + doubleHashingTable.getNumElements() + ", of which " + doubleHashingTable.getNumDuplicates() + " duplicates");
+        System.out.println("load factor = " + loadFactor + ", Avg. no. of probes " + avgDoubleProbes);
+
+        /* Create dump files */
+        if (debugMode == 1)
+        {
+            StringBuilder linearDump = new StringBuilder();
+            StringBuilder doubleDump = new StringBuilder();
+            HashObject linearObject = null;
+            HashObject doubleObject = null;
+            for (int i = 0; i < tableSize; i++)
+            {
+                linearObject = linearProbingTable.getTable()[i];
+                doubleObject = doubleHashingTable.getTable()[i];
+
+                if (linearProbingTable.getTable()[i] != null)
+                {
+                    linearDump.append("table[" + i + "]: " + linearObject.toString() + "\n");
+                }
+
+                if (doubleHashingTable.getTable()[i] != null)
+                {
+                    doubleDump.append("table[" + i + "]: " + doubleObject.toString() + "\n");
+                }
+            }
+
+            try {
+                Files.write(Paths.get("linear-dump.txt"), linearDump.toString().getBytes());
+                Files.write(Paths.get("double-dump.txt"), doubleDump.toString().getBytes());
+            } catch (IOException e) {
+                e.printStackTrace();
             }
         }
     }

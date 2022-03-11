@@ -2,7 +2,9 @@ public class HashTable<T>
 {
     private HashObject[] table;     // The table in which to store HashObjects
     private boolean doubleHash;     // True if using double hashing, false if using linear hashing.
-    private int size;
+    private int size;               // The size of the table
+    private int totalNumElements;   // The total number of filled elements in array.
+    private int globalDuplicateCount; // The global duplicate count
     private int globalProbeCount;   // The global probe count (not counting duplicates)
 
     /**
@@ -16,6 +18,8 @@ public class HashTable<T>
         table = new HashObject[size];
         this.doubleHash = doubleHash;
         globalProbeCount = 0;
+        totalNumElements = 0;
+        globalDuplicateCount = 0;
     }
 
     /**
@@ -44,6 +48,7 @@ public class HashTable<T>
             if ((table[j] == null) || (table[j].isDeleted()))   // Check if entry is empty
             {
                 globalProbeCount += hashObject.getProbeCount(); // Add probes to global probe count
+                totalNumElements++;
                 table[j] = hashObject;
                 retVal = j;
                 found = true;
@@ -51,12 +56,13 @@ public class HashTable<T>
             else if (hashObject.equals(table[j]))               // Check if duplicate
             {
                 table[j].incrementDuplicateCount();
+                globalDuplicateCount++;
                 retVal = j;
                 found = true;
             }
             i++;
         }
-        System.out.println(table[j].toString());
+        //System.out.println(retVal); // TODO: TEST FOR DUPE COUNT, WORKS IN DEBUGGER, BREAKS WHEN RUNNING?
         return retVal;
     }
 
@@ -118,4 +124,32 @@ public class HashTable<T>
     {
         return globalProbeCount;
     }
+
+    /**
+     * Returns the number of filled elements in table
+     * @return totalNumElements
+     */
+    public int getNumElements()
+    {
+        return totalNumElements;
+    }
+
+    /**
+     * Returns the number of duplicates in the table
+     * @return globalDuplicateCount
+     */
+    public int getNumDuplicates()
+    {
+        return globalDuplicateCount;
+    }
+
+    /**
+     * Returns the array of HashObjects that composes the HashTable
+     * @return HashTable
+     */
+    public HashObject[] getTable()
+    {
+        return table;
+    }
+
 }

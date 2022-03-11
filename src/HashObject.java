@@ -56,7 +56,7 @@ public class HashObject<T>
     @Override
     public String toString()
     {
-        return ("Key: " + keyObject.toString() + " Dup: " + duplicateCount + " Pro: " + probeCount);
+        return (keyObject.toString() + " " + duplicateCount + " " + probeCount);
     }
 
     /**
