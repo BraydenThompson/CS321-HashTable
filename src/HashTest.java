@@ -1,6 +1,7 @@
 /**
  * Test class for two HashTables, one using linear hashing, and one using double hashing.
- * Supports three input types, TODO
+ * Supports three input types, random numbers, current time, and the provided word-list.
+ * Returns the average number of probes for both tables given the provided load factor.
  */
 
 import java.io.File;
@@ -38,7 +39,7 @@ public class HashTest {
             }
 
             /* Load Factor */
-            if (Double.parseDouble(args[1]) > 0 && Double.parseDouble(args[1]) <= 1)
+            if (Double.parseDouble(args[1]) > 0 && Double.parseDouble(args[1]) < 1)
             {
                 loadFactor = Double.parseDouble(args[1]);
             }
@@ -48,10 +49,15 @@ public class HashTest {
                 System.exit(1);
             }
         }
+        else
+        {
+            printUsage();
+            System.exit(1);
+        }
 
         if (args.length == 3)
         {
-            /* Load Factor */
+            /* Debug Mode */
             if (args[2].equals("0") || args[2].equals("1"))
             {
                 debugMode = Integer.parseInt(args[2]);
@@ -104,11 +110,8 @@ public class HashTest {
                 linearProbingTable = new HashTable<Long>((int) tableSize, false);
                 doubleHashingTable = new HashTable<Long>((int) tableSize, true);
 
-                // TODO: TEMP DEBUG PRINT
-                System.out.println(linearProbingTable.getNumDuplicates());
-
                 long inputNum;
-                int i = 0; // TODO: TEMP CHECKER
+
                 // Fill tables until target load factor is reached
                 while ((linearProbingTable.getNumElements() / (double) tableSize) < loadFactor)
                 {
@@ -116,12 +119,6 @@ public class HashTest {
                     linearProbingTable.insert(inputNum);
                     doubleHashingTable.insert(inputNum);
 
-                    // TODO: TEMP DEBUG PRINT
-                    if (i % 10000 == 0)
-                    {
-                      //  System.out.println(linearProbingTable.getNumElements());          // TODO: THIS WORKS TOTALLY FINE IN DEBUGGER, RETURNS GIANT NUMBERS WHEN ACTUALLY RUNNING IT
-                    }
-                    i++;
                 }
                 break;
             }
@@ -170,8 +167,8 @@ public class HashTest {
         {
             StringBuilder linearDump = new StringBuilder();
             StringBuilder doubleDump = new StringBuilder();
-            HashObject linearObject = null;
-            HashObject doubleObject = null;
+            HashObject linearObject;
+            HashObject doubleObject;
             for (int i = 0; i < tableSize; i++)
             {
                 linearObject = linearProbingTable.getTable()[i];
@@ -200,7 +197,7 @@ public class HashTest {
     private static void printUsage()
     {
         System.out.println("HashTest is used as follows:");
-        System.out.println("java HashTest <input type> <load factor> [<debug level>]");
+        System.out.println("$ java HashTest <input type> <load factor> [<debug level>]");
         System.out.println("Input type: 1 - Random Integers, 2 - Current Time Ms, 3 - word - list");
         System.out.println("Load factor: Target alpha value, between 0 and 1");
         System.out.println("(Optional) Debug level: (Default) 0 - Print summary, 1 - Print summary and dump tables");

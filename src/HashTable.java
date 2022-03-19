@@ -4,7 +4,7 @@ public class HashTable<T>
     private boolean doubleHash;     // True if using double hashing, false if using linear hashing.
     private int size;               // The size of the table
     private int totalNumElements;   // The total number of filled elements in array.
-    private int globalDuplicateCount; // The global duplicate count
+    private long globalDuplicateCount; // The global duplicate count
     private int globalProbeCount;   // The global probe count (not counting duplicates)
 
     /**
@@ -138,7 +138,7 @@ public class HashTable<T>
      * Returns the number of duplicates in the table
      * @return globalDuplicateCount
      */
-    public int getNumDuplicates()
+    public long getNumDuplicates()
     {
         return globalDuplicateCount;
     }
